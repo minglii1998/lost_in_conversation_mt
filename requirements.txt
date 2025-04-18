@@ -1,0 +1,11 @@
+datasets
+numpy
+tqdm
+tiktoken
+pandas
+streamlit
+nltk # Spider evaluation requirement
+sqlparse # Spider evaluation requirement
+pymongo # bson ObjectId
+matplotlib
+# sacrebleu  # wmt, totto evaluation

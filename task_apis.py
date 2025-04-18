@@ -1,0 +1,101 @@
+from utils_eval_bfcl import ast_checker, ast_parse
+from typing import Dict, List, Any
+from task_base import Task
+import json, random
+
+class TaskAPIs(Task):
+    def __init__(self, version=""):
+        # self.version = version
+        with open("prompts/apis/apis_system_prompt.txt", "r") as f:
+            self.system_prompt = f.read()
+        with open("prompts/apis/apis_full_prompt.txt", "r") as f:
+            self.fully_specified_prompt = f.read()
+        with open(f"data/bfcl/answers/BFCL_v3_parallel.json", "r") as f:
+            data = [json.loads(line) for line in f]    
+        self.ground_truth = {d["id"]: d["ground_truth"] for d in data}
+
+        self.answer_extraction_strategy = "full_response"
+
+        self.seed = 42
+        random.seed(self.seed)
+
+    def get_dataset_file(self) -> str:
+        return "data/sharded_apis.json"
+
+    def get_samples(self, filter="") -> List[Dict[str, Any]]:
+        with open(self.get_dataset_file(), "r") as f:
+            data = json.load(f)
+        return data
+
+    def get_task_name(self):
+        return "apis"
+    
+    def get_answer_description(self) -> str:
+        # FIXME
+        return (
+            "The answer should be a series of valid function calls in the format of "
+            "[func_name1(params_name1=params_value1, params_name2=params_value2...), func_name2(params)]. "
+            "An answer may contain multiple function calls."
+        )
+    
+    def generate_system_prompt(self, sample: Dict[str, Any]) -> str:
+        return self.system_prompt.replace("[[FUNCTIONS]]", "{}".format(sample["function"]))
+
+    def evaluator_function(self, predicted_answer: str, sample: Dict[str, Any]) -> Dict:
+        """
+        Evaluate if the predicted function call matches the expected format and functionality.
+        """
+
+        try:
+            # attempt to decode ast out of the predicted answer
+            decoded_output = ast_parse(predicted_answer.strip(), sample["language"])
+        except Exception as e:
+            print(f"Error decoding AST: {e}")
+            # print(f"\033[94mPredicted answer: |{predicted_answer}|\033[0m")
+            return {"is_correct": False, "error": "Failing to parse the predicted answer as an AST"}
+
+        # compare with the ground truth
+        if "original_task_id" in sample:
+            task_id = sample["original_task_id"].split("/")[-1]
+        else:
+            task_id = sample["task_id"].split("/")[-1]
+        ground_truth = self.ground_truth[task_id]
+
+        result = ast_checker(
+            sample["function"],
+            decoded_output,
+            ground_truth,
+            sample["language"],
+            sample["test_category"],
+            "gpt-4o"
+        )
+        score = 1 if result["valid"] else 0
+        return {"is_correct": result["valid"], "score": score, "error": result["error"]}
+    
+    def populate_fully_specific_prompt(self, sample: Dict[str, Any]) -> str:
+        # The official gorilla repo inserts functions as a un-indented one-liner
+        return self.fully_specified_prompt.replace("[[QUESTION]]", sample["fully_specified_question"][0][0]["content"])
+    
+    def populate_concat_prompt(self, sample: Dict[str, Any]) -> str:
+        query = ""
+        for shard in sample["shards"]:
+            query += f"- {shard['shard']}\n"
+        return self.fully_specified_prompt.replace("[[QUESTION]]", query)
+
+    def extract_fully_specific_response(self, response: str, sample: Dict[str, Any]) -> str:
+        return response
+
+    def process_original_sample(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+        """Process BFCL sample for annotation UI display"""
+        ground_truth = self.ground_truth[sample["task_id"].split("/")[-1]]
+        return {
+            "task_id": sample["task_id"],
+            "question": sample["fully_specified_question"][0][0]["content"],  # because their data supports multi-turn. Hardcoding for the single-turn version for now.
+            "answer": ground_truth,
+        }
+
+if __name__ == "__main__":
+    task = TaskAPIs()
+    samples = task.get_samples()
+    print(len(samples))
+

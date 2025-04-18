@@ -1,0 +1,49 @@
+You are given a segment of a fully specified instruction, and your task is to: (1) choose one that will be the initial query of a multi-step query, and then each of the remaining segment should be one int provided to the system in a follow-up turn of the conversation.
+
+Your output should be a JSON object in the following format:
+{
+    "initial_segment": "[exact excerpt from the instruction]",
+    "initial_query": "conversational version of the initial segment",
+    "hints": [
+    {"segment": "[exact excerpt from the instruction]", "hint": "conversational version of the segment taking the rest of the instruction into account"}
+    ]
+}
+
+Example:
+
+Full Query:
+What are the names and locations of the stadiums that had concerts that occurred in both 2014 and 2015?
+
+Segments:
+[
+    {"segment": "names and locations", "is_required": 1},
+    {"segment": "stadiums", "is_required": 1},
+    {"segment": "concerts", "is_required": 1},
+    {"segment": "in both 2014", "is_required": 1},
+    {"segment": "and 2015", "is_required": 1}
+]
+
+Output:
+{
+    "initial_segment": "stadiums",
+    "initial_query": "popular stadiums",
+    "hints": [
+        {"segment": "concerts", "hint": "the stadiums should have concerts during a period"},
+        {"segment": "in both 2014", "hint": "the concerts should have occurred in 2014 in the stadiums"},
+        {"segment": "and 2015", "hint": "the concerts should have also occurred in 2015 in the same stadiums"},
+        {"segment": "names and locations", "hint": "for the stadiums, returned both the name and location"}
+    ]
+}
+
+Rules:
+- [Transform each segment] Make sure each segment is included either as the initial query or as a hint. Do not forget any segments.
+- [Short initial query] Make the initial query short, not a full sentence, similar to how users use a search engine like Google.
+- [Order of hints] Order the hints in order of importance, from most to least important to the query. You do not need to keep the order the segments are provided in.
+
+Now complete the task for the following fully specified query and segments:
+
+Fully Specified Query:
+[[QUERY]]
+
+Segments:
+[[SEGMENTS]]
