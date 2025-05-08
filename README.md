@@ -1,13 +1,5 @@
-# LLMs Get Lost in Multi-Turn Conversation
-
 <p align="center">
   <img height="500" src="https://github.com/microsoft/lost_in_conversation/blob/main/images/Lost_in_Conv_Github_Teaser.png?raw=true">
-</p>
-
-Simulating conversations with the provided code can reproduce findings from the paper, such as results in the below Table:
-
-<p align="center">
-  <img height="500" src="https://github.com/microsoft/lost_in_conversation/blob/main/images/Lost_in_Conv_Main_Table.png?raw=true">
 </p>
 
 # Table of Contents
@@ -38,6 +30,17 @@ Simulating conversations with the provided code can reproduce findings from the 
 - [Cite the Work](#cite-the-work)
 - [Contact](#contact)
 
+# LLMs Get Lost in Multi-Turn Conversation
+
+
+
+Lost in Conversation is a code repository to facilitate benchmarking LLMs on multi-turn task completion and the reproduction of experiments included in the accompanying paper: "LLMs Get Lost in Multi-Turn Conversation". Simulating conversations with the provided code can reproduce findings from the paper, such as results in the below Table:
+
+<p align="center">
+  <img height="500" src="https://github.com/microsoft/lost_in_conversation/blob/main/images/Lost_in_Conv_Main_Table.png?raw=true">
+</p>
+
+
 ## Repository Contents
 
 - The `run_experiments.py` file which can be used to run experiments to validate findings of the paper.
@@ -47,9 +50,7 @@ Simulating conversations with the provided code can reproduce findings from the 
 - Prompt-related content (`prompts/`) which contains all the prompts used (1) either during simulation, (2) or during the sharding process (see paper Appendix on Sharding Process).
 - Instruction data (`data/sharded_instructions_600.json`) which contains the 600 sharded instructions used to simulate conversations.
 
-## Getting Started
-
-### 1. Simulating Conversations
+## 1. Simulating Conversations
 
 You can simply run the following command:
 ```sh
@@ -63,20 +64,20 @@ This will require to set the environment variable `OPENAI_API_KEY` or `AZURE_OPE
 
 For the paper's experiments, we included models from other organizations, which require integration beyond OpenAI's API. If you would like the additional API integration files, you can contact us.
 
-### 2. Viewing Simulated Conversations
+## 2. Viewing Simulated Conversations
 
 Use the streamlit app to view conversations:
 ```sh
 streamlit run app_conv_viewer.py
 ```
 
-### 3. Adding a New Task
+## 3. Adding a New Task
 
 You can look at the `task_base.py` file for a sense of the required functions.
 Then create a folder in `tasks/<new_task>` with your task logic files, and add an entry into `tasks.py` with the new task class. That's it!
 
 
-### 4. Setup Details
+## 4. Setup Details
 
 - Simulation of the `code` task does not work on Windows (due to issue with eval code working only on Unix)
 - Simulation of the `database` task requires downloading test databases (<5 Gb) and copying the files to `data/spider/databases/`. See instructions in `data/spider/README.md`
@@ -98,13 +99,13 @@ The task-specific keys and values depend on the task, and are used for bookkeepi
 
 ## Dataset Creation & Processing
 
-The data was created through automatic generation followed by manual curation by the authors of the work, between January and April 2025. The exact process is described in the “Sharding Process” Appendix section of the paper. 
+The data was created through automatic generation followed by manual curation by the authors of the work, between January and April 2025. The exact process is described in the "Sharding Process" Appendix section of the paper. 
 
-Creating datasets involved transforming existing data (fully-specified single-turn instructions) from seven datasets, as listed in the paper. All datasets correspond to datasets released to evaluate LLM performance on generation tasks.
+Creating datasets involved transforming existing data (fully-specified single-turn instructions) from seven datasets, as listed in the paper. All datasets correspond to datasets released to evaluate LLM performance on generation tasks.
 
 ## Intended Use
 
-Lost in Conversation is best suited to simulate single-turn and multi-turn conversations for the tasks we’ve set up. Six tasks are included with our release, all analytical generation tasks: (1) Python programming, (2) Database query generation, (3) API function calling, (4) elementary math problems, (5) data2text tasks, (6) summarization. 
+Lost in Conversation is best suited to simulate single-turn and multi-turn conversations for the tasks we've set up. Six tasks are included with our release, all analytical generation tasks: (1) Python programming, (2) Database query generation, (3) API function calling, (4) elementary math problems, (5) data2text tasks, (6) summarization. 
 
 Lost in Conversation is being shared with the research community to facilitate reproduction of our results and foster further research in this area. 
 
@@ -116,11 +117,11 @@ Lost in Conversation is not intended to simulate realistic interaction between h
 
 We do not recommend using Lost in Conversation in commercial or real-world applications without further testing and development. It is being released for research purposes. 
 
-Lost in Conversation was not designed or evaluated for all possible downstream purposes. Developers should consider its inherent limitations as they select use cases, and evaluate and mitigate for accuracy, safety, and fairness concerns specific to each intended downstream use. 
+Lost in Conversation was not designed or evaluated for all possible downstream purposes. Developers should consider its inherent limitations as they select use cases, and evaluate and mitigate for accuracy, safety, and fairness concerns specific to each intended downstream use. 
 
 Lost in Conversation should not be used in highly regulated domains where inaccurate outputs could suggest actions that lead to injury or negatively impact an individual's legal, financial, or life opportunities. 
 
-We do not recommend using Lost in Conversation in the context of high-risk decision making (e.g. in law enforcement, legal, finance, or healthcare). 
+We do not recommend using Lost in Conversation in the context of high-risk decision making (e.g. in law enforcement, legal, finance, or healthcare). 
 
 
 ## Limitations
@@ -145,23 +146,23 @@ Better performance can be achieved by experimenting at small-scale and then proc
 
 We have manually validated the samples used during the simulation conducted for the paper. However, future use might involve instructions that are not manually validated which could lead to degradation of the simulation environment. We encourage users of Lost in Conversation to validate the instructions they run simulations on manually, or exercise caution in interpreting results on unverified samples. The thinking is, once a sample is manually validated, degradation in performance from an LLM during simulation should be a reflection of model behavior. With uninspected instructions, degradation in performance could also be due to an invalid simulation (infeasible sample). 
 
-We strongly encourage users to use LLMs/MLLMs that support robust Responsible AI mitigations, such as Azure Open AI (AOAI) services. Such services continually update their safety and RAI mitigations with the latest industry standards for responsible use. For more on AOAI’s best practices when employing foundations models for scripts and applications: 
+We strongly encourage users to use LLMs/MLLMs that support robust Responsible AI mitigations, such as Azure Open AI (AOAI) services. Such services continually update their safety and RAI mitigations with the latest industry standards for responsible use. For more on AOAI's best practices when employing foundations models for scripts and applications: 
 
 [Blog post on responsible AI features in AOAI that were presented at Ignite 2023](https://techcommunity.microsoft.com/t5/ai-azure-ai-services-blog/announcing-new-ai-safety-amp-responsible-ai-features-in-azure/ba-p/3983686) 
 
-[Overview of Responsible AI practices for Azure OpenAI models] (https://learn.microsoft.com/en-us/legal/cognitive-services/openai/overview) 
+[Overview of Responsible AI practices for Azure OpenAI models](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/overview) 
 
 [Azure OpenAI Transparency Note](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/transparency-note) 
 
-[OpenAI’s Usage policies](https://openai.com/policies/usage-policies) 
+[OpenAI's Usage policies](https://openai.com/policies/usage-policies) 
 
-[Azure OpenAI’s Code of Conduct](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/code-of-conduct) 
+[Azure OpenAI's Code of Conduct](https://learn.microsoft.com/en-us/legal/cognitive-services/openai/code-of-conduct) 
 
 Users are responsible for sourcing their datasets legally and ethically. This could include securing appropriate copy rights, ensuring consent for use of audio/images, and/or the anonymization of data prior to use in research.    
 
 Users are reminded to be mindful of data privacy concerns and are encouraged to review the privacy policies associated with any models and data storage solutions interfacing with Lost in Conversation.  
 
-It is the user’s responsibility to ensure that the use of Lost in Conversation complies with relevant data protection regulations and organizational guidelines. 
+It is the user's responsibility to ensure that the use of Lost in Conversation complies with relevant data protection regulations and organizational guidelines. 
 
 
 ## Contributing
@@ -186,7 +187,7 @@ trademarks or logos is subject to and must follow
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
 
-## Cite the work
+## Cite the Work
 
 If you make use of the code, data, or findings, please cite our paper:
 ```
@@ -200,4 +201,4 @@ If you make use of the code, data, or findings, please cite our paper:
 
 We welcome feedback and collaboration from our audience. If you have suggestions, questions, or observe unexpected/offensive behavior in our technology, please contact us at plaban@microsoft.com.  
 
-If the team receives reports of undesired behavior or identifies issues independently, we will update this repository with appropriate mitigations.
+If the team receives reports of undesired behavior or identifies issues independently, we will update this repository with appropriate mitigations.
