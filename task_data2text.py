@@ -65,7 +65,7 @@ class TaskData2Text(Task):
         prompt = prompt.replace("[[CONTEXT]]", context)
         return prompt
 
-    def populate_lazy_prompt(self, sample, turn_index):
+    def populate_sharded_prompt(self, sample, turn_index):
         if turn_index < len(sample["shards"]):
             shard = sample["shards"][turn_index]
             return shard["shard"], shard["shard_id"], 0.0

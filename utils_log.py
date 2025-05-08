@@ -52,7 +52,6 @@ def get_run_counts(conv_type, task_name, assistant_model, dataset_fn, log_folder
 
 
 def log_conversation(conv_type, task_name, task_id, dataset_fn, assistant_model, system_model, user_model, trace, is_correct=None, score=None, additional_info={}, log_folder=None):
-    # assert conv_type in ["full", "lazy", "concat", "recap-full", "recap-concat", "lazy-tree", "shuffle-concat", "snowball"]
     log_files = get_log_files(conv_type, task_name, assistant_model, force_create=True, log_folder=log_folder)
     log_file = log_files[-1]
 
@@ -123,7 +122,6 @@ def load_results_from(folder, dataset_fn, merge_trapi=True):
     return model_data
 
 def clean_up_logs(task_name, dataset_fn, ids=None, conv_types="all", models="all", is_mock=False, log_folder="logs"):
-    assert conv_types == "all" or (type(conv_types) == list and all(conv_type in ["full", "lazy", "concat", "recap-full", "recap-concat", "lazy-tree", "shuffle-concat", "snowball"] for conv_type in conv_types))
     assert models == "all" or (type(models) == list)
 
     # we're going to clean the files in the following manner:
@@ -223,26 +221,3 @@ def split_files_in_folder(folder):
     for fn in os.listdir(folder):
         if fn.endswith(".jsonl"):
             split_large_file(os.path.join(folder, fn))
-
-if __name__ == "__main__":
-    # clean_up_logs("wmt", "lazy_wmt_0.2.json", conv_types="all", models="all", is_mock=False)
-    # clean_up_logs("bfcl", "lazy_bfcl_0.1.json", conv_types="all", models=["t-o1-mini", "t-o1-preview", "t-gpt-4o", "t-gpt-4o-mini", "gemini-1.5-flash", "gemini-1.5-pro"], is_mock=False)
-    # clean_up_logs("humaneval", "lazy_humaneval_examples.json", conv_types="all", models=["gpt-4o", "gpt-4o-mini", "claude3.5-sonnet", "gemini-1.5-pro"], is_mock=False)
-    # redo_ids = [f"Lazy-HumanEval/{i}" for i in [5, 43, 74, 88, 118, 137, 138, 141]]
-    # clean_up_logs("humaneval", "lazy_humaneval_0.93.av.json", conv_types="all", ids=redo_ids, models=["gpt-4o", "gpt-4o-mini", "claude3.5-sonnet", "gemini-1.5-pro"], is_mock=False)
-    # clean_up_logs("spider", "lazy_spider_0.5_gradual_sharding.json", conv_types="all", models=["t-gpt-4o", "t-gpt-4o-mini"], is_mock=False) # , "gemini-1.5-flash", "gemini-1.5-pro"
-    # clean_up_logs("lcb", "lazy_lcb_0.2e.stdio.full.sample.json", conv_types="all", models=["gpt-4o", "gpt-4o-mini", "claude3.5-sonnet", "gemini-1.5-pro"], is_mock=False)
-
-    # df = check_latest_updates()
-    # print(df)
-
-
-
-    # split_large_file("logs/summary/lazy/lazy_summary_t-gpt-4.1.jsonl")
-    # split_large_file("logs/summary/full/full_summary_deepseek-r1.jsonl")
-    split_large_file("logs/summary/lazy/lazy_summary_gemini-2.5-pro.jsonl")
-    # print(get_run_counts("lazy", "summary", "gemini-2.0-flash", "data/sharded_summary.json"))
-    # print(load_results_from("logs/summary/lazy", "data/sharded_summary.json").keys())
-    # split_files_in_folder("logs/summary/full")
-
-    # print(get_run_counts("lazy", "summary", "gemini-2.0-flash", "data/sharded_summary.json"))

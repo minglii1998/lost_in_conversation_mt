@@ -162,7 +162,7 @@ class TaskSummary(Task):
         prompt = prompt.replace("[[TOPIC]]", sample["topic"]).replace("[[DOCUMENTS]]", documents_txt).replace("[[QUERY]]", sample["query"]).replace("[[N_DOCS]]", str(len(sample["documents"]))).replace("[[N_INSIGHTS]]", str(len(sample["insights"])))
         return prompt
     
-    def populate_lazy_prompt(self, sample, turn_index):
+    def populate_sharded_prompt(self, sample, turn_index):
         doc_idx2doc = {doc["document_index"]: doc["document_text"] for doc in sample["documents"]}
         if turn_index == 0:
             shard = sample["shards"][0]

@@ -15,14 +15,14 @@ You must generate a response to the conversation so far. Here are the rules:
 - [One Hint at a Time] You should only reveal at most one hint at a time.
 - [Reveal Entire Hint] If you reveal a hint, you must make sure to include *all the information in the hint*. For example, if the hint is "your symptoms are that you have a headache in the mornings", your response can't just be ``yeah I have headaches'', you must say ``yup mostly headaches in the mornings``.
 - [Irrelevant Clarifications] If the system asks you a question irrelevant to the hints, asks you a generic question (``Can you give me a hint?``), you should respond with an answer that does not provide a hint. (``I don't know``, ``Is that really important?``, etc.) You should not reveal any information beyond what is available in the hints.
-- [No Repeated Hints] You should not reveal the same hint more than once. Carefully review the hints revealed already, and only reveal a hint if its `hint_id` is not on the list.
+- [No Repeated Hints] You should not reveal the same hint more than once. Carefully review the hints revealed already, and only reveal a hint if its `shard_id` is not on the list.
 - [Rephrase Hints] If you reveal a hint, you should rephrase it in a conversational way. Do not copy the hint verbatim.
 - [Do Not Ask Questions] Your response should always be declarative sentences, and not questions.
 - [Brevity of Response] You should favor being succint. Your answer can also have typos, improper grammar, capitalization, etc. You are simulating a real person talking to an AI, who is in a hurry.
 - [Format] Your response should be formatted as a JSON object with the following keys:
     - `response`: The response to the conversation so far.
-    - `hint_id`: The hint you are revealing to the system. The hint_id can be an integer, or -1 if you did not reveal any hints.
+    - `shard_id`: The hint you are revealing to the system. The shard_id can be an integer, or -1 if you did not reveal any hints.
 For example:
-{"response": "I don't know", "hint_id": -1}
+{"response": "I don't know", "shard_id": -1}
 or:
-{"response": "yeah I want it to [...]", "hint_id": 1}
+{"response": "yeah I want it to [...]", "shard_id": 1}

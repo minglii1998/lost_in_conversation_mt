@@ -87,9 +87,3 @@ class TaskMath(Task):
             "question": sample["question"],
             "answer": sample["answer"],
         }
-
-
-if __name__ == "__main__":
-    with open("data/lazy_gsm8k_0.1.jsonl", "r") as f:
-        samples = [json.loads(line) for line in f]
-    task = TaskMath()

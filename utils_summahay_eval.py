@@ -1,5 +1,5 @@
 import json, numpy as np, re, os
-from llms import generate_json
+from model_openai import generate_json
 
 def summary2bullets(summary, max_summary_length=300):
     bullets = summary.split("\n")
@@ -43,7 +43,7 @@ def evaluate_insights(insights, summary, evaluator_model_card, eval_prompt_fn="p
     bullets_str = json.dumps({"bullets": [{"bullet_id": i+1, "text": bullet} for i, bullet in enumerate(bullets)]}, indent=1)
     insight_scores = []
     for insight in insights:
-        response_all = generate_json([{"role": "user", "content": prompt_eval}], model=evaluator_model_card, step="summhay-insight-eval", return_metadata=True, variables={"BULLETS": bullets_str, "INSIGHT": insight["insight"]})
+        response_all = generate_json([{"role": "user", "content": prompt_eval}], model=evaluator_model_card, return_metadata=True, variables={"BULLETS": bullets_str, "INSIGHT": insight["insight"]})
         response_json  = response_all["message"]
         response_json["insight_id"] = insight["insight_id"] 
         insight_scores.append(response_json)

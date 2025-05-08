@@ -1,3 +1,12 @@
+# Lost in Conversation
+
+
+Notes:
+
+- Simulation of the `code` task does not work on Windows (due to issue with eval code working only on Unix)
+- Simulation of the `database` task requires downloading test databases (<5 Gb) and copying the files to `data/spider/databases/`. See instructions in `data/spider/README.md`
+
+
 # Project
 
 > This repo has been populated by an initial template to help get you started. Please

@@ -1,11 +1,11 @@
+import os
 from utils_eval_spider_exec import eval_exec_match
 from typing import Dict, Any, List
 from task_base import Task
 import json, re
 
 class TaskDatabase(Task):
-    def __init__(self, version=""):
-        # self.version = version
+    def __init__(self):
         with open(f"prompts/database/database_full_prompt.txt", "r") as f:
             self.fully_specified_prompt = f.read()
         with open(f"prompts/database/database_system_prompt.txt", "r") as f:
@@ -16,7 +16,7 @@ class TaskDatabase(Task):
         return "data/sharded_database.json"
 
 
-    def get_samples(self, filter=""):
+    def get_samples(self):
         with open(self.get_dataset_file(), "r") as f:
             data = json.load(f)
         return data
@@ -37,6 +37,11 @@ class TaskDatabase(Task):
         pred_sql = extracted_answer.replace("```sql", "").replace("```", "")
         pred_sql = re.sub(r"\s+", " ", pred_sql).strip()
         ref_sql = sample["reference_sql"]
+        # if there's no data/spider/databases/ folder, then throw an error
+        if not os.path.exists("data/spider/databases/"):
+            raise FileNotFoundError("data/spider/databases/ folder not found; please see data/spider/README.md for instructions")
+
+
         try:
             is_correct = eval_exec_match(f"data/spider/databases/{sample['db_id']}/", pred_sql, ref_sql, plug_value=True, keep_distinct=False, progress_bar_for_each_datapoint=False) == 1
         except Exception as e:

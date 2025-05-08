@@ -242,22 +242,3 @@ def eval_exec_match(db: str, p_str: str, g_str: str, plug_value: bool, keep_dist
 
     # none of the predictions passed
     return 0
-
-if __name__ == "__main__":
-
-    with open("data/lazy_spider_0.1.json", "r") as f:
-        samples = json.load(f)
-
-    sample = samples[0]
-
-    ref_sql = sample["reference_sql"]
-
-    print(ref_sql)
-
-    # pred_sql = "SELECT T2.name ,  T2.capacity FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.year  >=  2014"
-    pred_sql = "SELECT T2.name ,  T2.capacity AS cap FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id  =  T2.stadium_id WHERE T1.year  >=  2014 GROUP BY T2.stadium_id ORDER BY count(*) DESC LIMIT 1"
-
-    db_path = f"data/spider/databases/{sample['db_id']}/"
-    print(db_path)
-
-    print(eval_exec_match(db_path, pred_sql, ref_sql, True, False, True))

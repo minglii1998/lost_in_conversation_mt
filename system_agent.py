@@ -1,5 +1,5 @@
 from utils import extract_conversation
-from llms import generate_json
+from model_openai import generate_json
 from tasks import get_task
 import json
 
@@ -28,21 +28,16 @@ class SystemAgent:
             # in these tasks, the assistant is explicitly instructed to provide an answer attempt at each turn
             return {"response_type": "answer_attempt"}, 0.0
 
-        if "shards" in self.sample:
-            initial_query = self.sample["shards"][0]["shard"]
-            hints = self.sample["shards"][1:]
-        else:
-            # this needs to be removed, also why do we need hints in the turn classification?
-            initial_query = self.sample["initial_query"] if "initial_query" in self.sample else self.sample["lazy"]["initial_query"]
-            hints = self.sample["hints"] if "hints" in self.sample else self.sample["lazy"]["hints"]
+        initial_query = self.sample["shards"][0]["shard"]
+        shards = self.sample["shards"][1:]
 
         last_turn_text = extract_conversation(conversation_so_far, to_str=True, only_last_turn=True)
 
         # print("--------------------- TURN CLASSIFICATION ---------------------")
         # print(last_turn_text)
 
-        system_verification_prompt_populated = self.system_verification_prompt.replace("[[CONVERSATION_SO_FAR]]", last_turn_text).replace("[[INITIAL_QUERY]]", initial_query).replace("[[HINTS]]", json.dumps(hints)).replace("[[ANSWER_DESCRIPTION]]", self.answer_description)
-        system_verification_response_obj = generate_json([{"role": "user", "content": system_verification_prompt_populated}], model=self.system_model, step="lazy-simulator-system-verification", return_metadata=True, temperature=0.0)
+        system_verification_prompt_populated = self.system_verification_prompt.replace("[[CONVERSATION_SO_FAR]]", last_turn_text).replace("[[INITIAL_QUERY]]", initial_query).replace("[[HINTS]]", json.dumps(shards)).replace("[[ANSWER_DESCRIPTION]]", self.answer_description)
+        system_verification_response_obj = generate_json([{"role": "user", "content": system_verification_prompt_populated}], model=self.system_model, return_metadata=True, temperature=0.0)
         system_verification_response = system_verification_response_obj["message"]
 
         # print(system_verification_response)
@@ -64,7 +59,7 @@ class SystemAgent:
             extraction_attempts = 0
             while extracted_answer is None and extraction_attempts < self.max_extraction_attempts:
                 extraction_attempts += 1
-                answer_extraction_response_obj = generate_json([{"role": "user", "content": prompt}], model=self.system_model, step="lazy-simulator-answer-extraction", return_metadata=True, variables={"ASSISTANT_RESPONSE": last_assistant_turn_text, "ANSWER_DESCRIPTION": self.answer_description}, temperature=0.0)
+                answer_extraction_response_obj = generate_json([{"role": "user", "content": prompt}], model=self.system_model, return_metadata=True, variables={"ASSISTANT_RESPONSE": last_assistant_turn_text, "ANSWER_DESCRIPTION": self.answer_description}, temperature=0.0)
                 answer_extraction_response = answer_extraction_response_obj["message"]
                 if self.answer_extraction_strategy == "gen":
                     extracted_answer = answer_extraction_response["answer"]

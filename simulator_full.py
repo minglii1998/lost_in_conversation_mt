@@ -1,8 +1,8 @@
 from utils_log import log_conversation
 from system_agent import SystemAgent
+from model_openai import generate
 from tasks import get_task
 from utils import date_str
-from llms import generate
 import random
 
 class ConversationSimulatorFull:
@@ -29,10 +29,7 @@ class ConversationSimulatorFull:
         if self.run_shuffle_concat:
             conv_type = "shuffle-concat"
 
-            if "shards" in self.sample:
-                random.shuffle(self.sample["shards"])
-            else:
-                random.shuffle(self.sample["hints"] if "hints" in self.sample else self.sample["lazy"]["hints"])
+            random.shuffle(self.sample["shards"])
 
             input_prompt = self.task.populate_concat_prompt(self.sample)
         elif self.run_concat:
@@ -42,16 +39,21 @@ class ConversationSimulatorFull:
             conv_type = "full"
             input_prompt = self.task.populate_fully_specific_prompt(self.sample)
 
+        if verbose:
+            print(f"\033[92m[system] {input_prompt}\033[0m")
+
         # custom output dir for different temperatures to not mix up
         if self.run_custom_temperature:
             conv_type = f"{conv_type}-t{self.temperature}"
 
-        is_reasoning_model = "o1" in self.assistant_model or "deepseek-r1" in self.assistant_model
+        is_reasoning_model = "o1" in self.assistant_model or "o3" in self.assistant_model or "deepseek-r1" in self.assistant_model
 
         max_tokens = 16000 if is_reasoning_model else 1000
-        assistant_response_obj = generate([{"role": "system", "content": self.system_message},{"role": "user", "content": input_prompt}], model=self.assistant_model, return_metadata=True, temperature=self.temperature, step="lazy-simulator-full", max_tokens=max_tokens)
+        assistant_response_obj = generate([{"role": "system", "content": self.system_message},{"role": "user", "content": input_prompt}], model=self.assistant_model, return_metadata=True, temperature=self.temperature, max_tokens=max_tokens)
 
         assistant_response = assistant_response_obj["message"]
+        if verbose:
+            print(f"\033[91m[assistant] {assistant_response}\033[0m")
 
         trace = [{"role": "system", "content": self.system_message}, {"role": "user", "content": input_prompt}, {"role": "assistant", "content": assistant_response, "cost_usd": assistant_response_obj["total_usd"]}]
 
@@ -59,8 +61,8 @@ class ConversationSimulatorFull:
 
         evaluation_return = self.task.evaluator_function(extracted_answer, self.sample)
         assert type(evaluation_return) == dict and ("score" in evaluation_return or "is_correct" in evaluation_return), f"Evaluator function should return a dictionary with 'score' or 'is_correct' key"
-        is_correct = evaluation_return.get("is_correct", None)
         score = evaluation_return.get("score", None)
+        is_correct = score == 1.0
 
         trace.append({"role": "log", "content": {"type": "answer-evaluation", "exact_answer": extracted_answer, "is_correct": is_correct, "score": score, "evaluation_return": evaluation_return}, "timestamp": date_str()})
 
@@ -76,14 +78,12 @@ class ConversationSimulatorFull:
 
 
 if __name__ == "__main__":
-    from collections import Counter
-    import json, os, argparse, tqdm
+    import json, argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--assistant_model", type=str, default="gemini-1.5-flash")
+    parser.add_argument("--assistant_model", type=str, default="gpt-4o-mini")
     parser.add_argument("--system_model", type=str, default="gpt-4o-mini")
-    parser.add_argument("--num_runs", type=int, default=10)
-    parser.add_argument("--task", type=str, default="apis")
+    parser.add_argument("--task", type=str, default="math")
     parser.add_argument("--run_concat", action="store_true")
     parser.add_argument("--run_shuffle_concat", action="store_true")
     parser.add_argument("--verbose", action="store_true")
@@ -92,15 +92,12 @@ if __name__ == "__main__":
     if args.run_concat and args.run_shuffle_concat:
         raise ValueError("Cannot set both run_concat and run_shuffle_concat to True")
 
-    task = get_task(args.task)
-    data = task.get_samples()
+    with open("data/sharded_instructions_600.json", "r") as f:
+        data = json.load(f)
 
-    conv_type = "full"
-    if args.run_concat:
-        conv_type = "concat"
-    elif args.run_shuffle_concat:
-        conv_type = "shuffle-concat"
+    data = [d for d in data if (d["task"] == args.task or args.task == "all")]
 
-    sample = data[0]
-    conversation_simulator = ConversationSimulatorFull(args.task, sample, args.assistant_model, args.system_model, args.run_concat, args.run_shuffle_concat)
+    sample = random.choice(data)
+
+    conversation_simulator = ConversationSimulatorFull(sample, args.assistant_model, args.system_model, args.run_concat, args.run_shuffle_concat)
     conversation_simulator.run(verbose=args.verbose, save_log=False)

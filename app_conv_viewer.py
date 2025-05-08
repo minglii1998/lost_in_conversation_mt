@@ -102,10 +102,6 @@ def main():
             options=sorted(tasks)
         )
 
-        # scan the data/lazy_{selected_task}_*.json and get the possible versions
-        versions = glob.glob(f"data/lazy_{selected_task}_*.json")
-        possible_versions = [d.split("_")[2].replace(".json", "") for d in versions]
-        # version = st.sidebar.selectbox("Select Version", options=sorted(possible_versions), index=len(possible_versions)-1)
 
         task = get_task(selected_task)
         dataset_fn = task.get_dataset_file().split("/")[-1]

@@ -3,7 +3,7 @@ from utils_log import log_conversation
 from system_agent import SystemAgent
 from user_agent import UserAgent
 from tasks import get_task
-from llms import generate
+from model_openai import generate
 import json, random, tqdm
 from concurrent.futures import ThreadPoolExecutor
 from utils_log import get_run_counts
@@ -45,32 +45,28 @@ Also,
         is_completed, is_correct, score = False, False, None
         user_response_history = []
 
-        if "shards" in self.sample:
-            hints = self.sample["shards"]
-        else:
-            # old, remove once everything is migrated to shards
-            hints = self.sample["hints"] if "hints" in self.sample else self.sample["lazy"]["hints"]
+        shards = self.sample["shards"]
 
         while not is_completed:
-            revealed_hint_ids = set([msg["content"]["hint_id"] for msg in self.trace if msg["role"] == "log" and msg["content"]["type"] == "hint_revealed"])
-            all_hints_revealed = len(revealed_hint_ids) == len(hints)
-            if all_hints_revealed:
+            revealed_shard_ids = set([msg["content"]["shard_id"] for msg in self.trace if msg["role"] == "log" and msg["content"]["type"] == "hint_revealed"])
+            all_shards_revealed = len(revealed_shard_ids) == len(shards)
+            if all_shards_revealed:
                 if verbose:
-                    print_colored(f"[log] all hints revealed ({revealed_hint_ids} / {len(hints)})", "blue")
+                    print_colored(f"[log] all hints revealed ({revealed_shard_ids} / {len(shards)})", "blue")
                 break # no need to keep going, nothing else to reveal
 
-            is_last_turn = len(revealed_hint_ids) == len(hints) - 1
+            is_last_turn = len(revealed_shard_ids) == len(shards) - 1
 
             # 1. get a user response
             user_response, hint_revealed_id, cost_usd = self.user_agent.generate_response(self.trace, self.sample)
 
             if hint_revealed_id != -1:
-                self.trace.append({"role": "log", "content": {"type": "hint_revealed", "hint_id": hint_revealed_id}, "timestamp": date_str()})
+                self.trace.append({"role": "log", "content": {"type": "hint_revealed", "shard_id": hint_revealed_id}, "timestamp": date_str()})
                 user_response_history.append(user_response)
                 if verbose:
                     print_colored(f"[log] hint revealed: {hint_revealed_id}", "blue")
 
-            if len(revealed_hint_ids) > 0:
+            if len(revealed_shard_ids) > 0:
                 # Create a new user response that includes all hints so far
                 user_response = self.user_response_template.format(HINTS_SO_FAR="\n".join([f"- {hint}" for hint in user_response_history[:-1]]), LAST_HINT=user_response_history[-1])
 
@@ -79,7 +75,7 @@ Also,
                 print_colored(f"[user] {user_response}", "green")
 
             # 2. get the assistant's response
-            assistant_response_obj = generate(extract_conversation(self.trace, to_str=False), model=self.assistant_model, temperature=1.0, step="snowball-simulator-assistant-generation", return_metadata=True, max_tokens=max_assistant_tokens)
+            assistant_response_obj = generate(extract_conversation(self.trace, to_str=False), model=self.assistant_model, temperature=1.0, return_metadata=True, max_tokens=max_assistant_tokens)
             assistant_response = assistant_response_obj["message"]
             self.trace.append({"role": "assistant", "content": assistant_response, "timestamp": date_str(), "cost_usd": assistant_response_obj["total_usd"]})
             if verbose:

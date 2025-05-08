@@ -63,11 +63,6 @@ class Task(ABC):
         with open(dataset_fn, "w") as f:
             json.dump(samples, f, indent=4)
 
-    # not needed anymore since full <-> lazy use the same extraction mechanism
-    # @abstractmethod
-    # def extract_fully_specific_response(self, response: str, sample: Dict[str, Any]) -> str:
-    #     """Extract and evaluate the answer from a fully-specified response"""
-    #     pass
 
     @abstractmethod
     def process_original_sample(self, sample: Dict[str, Any]) -> Dict[str, Any]:

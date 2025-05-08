@@ -1,10 +1,10 @@
 # from task_base import Task
 from task_database import TaskDatabase
 from task_math import TaskMath
-from task_python import TaskPython
+from task_code import TaskCode
 from task_summary import TaskSummary
 from task_data2text import TaskData2Text
-from task_apis import TaskAPIs
+from task_actions import TaskActions
 from task_translation import TaskTranslation
 
 
@@ -15,8 +15,8 @@ def get_task(task_name, version=None):
 
     if task_name.startswith("database"):
         return TaskDatabase(**kwargs)
-    elif task_name == "python":
-        return TaskPython(**kwargs)
+    elif task_name == "code":
+        return TaskCode(**kwargs)
     elif task_name == "translation":
         return TaskTranslation(**kwargs)
     elif task_name == "summary":
@@ -25,8 +25,8 @@ def get_task(task_name, version=None):
         return TaskData2Text(**kwargs)
     elif task_name == "math":
         return TaskMath(**kwargs)
-    elif task_name.startswith("apis"):
-        return TaskAPIs(**kwargs)
+    elif task_name.startswith("actions"):
+        return TaskActions(**kwargs)
     else:
         raise ValueError(f"Task {task_name} not supported")
 

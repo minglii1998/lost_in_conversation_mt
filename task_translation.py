@@ -41,7 +41,7 @@ class TaskTranslation(Task):
             source_document += f"Document Chunk {i+1}:\n" + shard["shard"] + "\n\n"
         return self.fully_specified_prompt.replace("[[GERMAN_TEXT]]", source_document)
 
-    def populate_lazy_prompt(self, sample, turn_index):
+    def populate_sharded_prompt(self, sample, turn_index):
         if turn_index == 0:
             first_shard = sample["shards"][0]
             prompt = "You are translating a document from German to English that is being transcribed live. I will provide you with the document in chunks. At each turn, you should return the translation of the ENTIRE DOCUMENT (and not just the last chunk). You should consider all chunks together when translating, and not just the last chunk. You can optionally modify previously translated chunks if you think you had made mistakes.\n\nChunk 1:\n\n[[CHUNK_1]]"
