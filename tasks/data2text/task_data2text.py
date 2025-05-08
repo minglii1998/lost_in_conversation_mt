@@ -12,16 +12,14 @@ class TaskData2Text(Task):
         self.answer_extraction_strategy = "full_response"
 
     def get_dataset_file(self):
-        return "data/sharded_data2text.json"
+        return "data/sharded_instructions_600.json"
 
 
-    def get_samples(self, filter="full"):
+    def get_samples(self):
         with open(self.get_dataset_file(), "r") as f:
             data = json.load(f)
-        if filter == "accepted":
-            return [d for d in data if d.get("annotation_status") == "accepted"]
-        elif filter == "full":
-            return data[:120]
+        data = [d for d in data if d["task"] == "data2text"]
+        return data
 
     def get_task_name(self) -> str:
         return "data2text"

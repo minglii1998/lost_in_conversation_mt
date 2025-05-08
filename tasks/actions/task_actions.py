@@ -1,4 +1,4 @@
-from utils_eval_bfcl import ast_checker, ast_parse
+from tasks.actions.eval_bfcl import ast_checker, ast_parse
 from typing import Dict, List, Any
 from task_base import Task
 import json, random
@@ -16,11 +16,12 @@ class TaskActions(Task):
         random.seed(self.seed)
 
     def get_dataset_file(self) -> str:
-        return "data/sharded_actions.json"
+        return "data/sharded_instructions_600.json"
 
     def get_samples(self) -> List[Dict[str, Any]]:
         with open(self.get_dataset_file(), "r") as f:
             data = json.load(f)
+        data = [d for d in data if d["task"] == "actions"]
         return data
 
     def get_task_name(self):

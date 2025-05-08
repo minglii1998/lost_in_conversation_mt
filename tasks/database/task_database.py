@@ -1,5 +1,5 @@
 import os
-from utils_eval_spider_exec import eval_exec_match
+from tasks.database.eval_spider_exec import eval_exec_match
 from typing import Dict, Any, List
 from task_base import Task
 import json, re
@@ -13,12 +13,13 @@ class TaskDatabase(Task):
         self.answer_extraction_strategy = "prefix_suffix"
 
     def get_dataset_file(self) -> str:
-        return "data/sharded_database.json"
+        return "data/sharded_instructions_600.json"
 
 
     def get_samples(self):
         with open(self.get_dataset_file(), "r") as f:
             data = json.load(f)
+        data = [d for d in data if d["task"] == "database"]
         return data
 
     def get_task_name(self) -> str:

@@ -1,12 +1,9 @@
 from typing import List, Dict, Any
 from task_base import Task
-import json
-import random
-import re
+import json, random, re
 
 class TaskMath(Task):
-    def __init__(self, version=""):
-        # self.version = version
+    def __init__(self):
         with open("prompts/math/math_full_prompt.txt", "r") as f:
             self.fully_specified_prompt = f.read()
         with open("prompts/math/math_system_prompt.txt", "r") as f:
@@ -22,10 +19,7 @@ class TaskMath(Task):
     def get_samples(self, filter="full"):
         with open(self.get_dataset_file(), "r") as f:
             data = json.load(f)
-        if filter == "accepted":
-            return [d for d in data if d.get("annotation_status") == "accepted"]
-        elif filter == "full":
-            return data[:120]
+        return data
 
     def get_task_name(self):
         return "math"

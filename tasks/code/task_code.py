@@ -9,7 +9,7 @@ import ast
 
 
 from task_base import Task
-from task_code_eval import check_correctness
+from tasks.code.eval_code import check_correctness
 
 
 class TaskCode(Task):
@@ -29,13 +29,12 @@ class TaskCode(Task):
         self.answer_extraction_strategy = "task_specific"
 
     def get_dataset_file(self) -> str:
-        return "data/sharded_code.json"
+        return "data/sharded_instructions_600.json"
 
-    def get_samples(self, filter="") -> List[Dict[str, Any]]:
+    def get_samples(self) -> List[Dict[str, Any]]:
         with open(self.get_dataset_file(), "r") as f:
             data = json.load(f)
-        if filter == "mini":
-            data = data[:5]
+        data = [d for d in data if d["task"] == "code"]
         return data
 
     def get_task_name(self):

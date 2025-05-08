@@ -17,6 +17,7 @@ class TaskTranslation(Task):
     def get_samples(self) -> List[Dict[str, Any]]:
         with open(self.get_dataset_file(), "r") as f:
             data = json.load(f)
+        data = [d for d in data if d["task"] == "translation"]
         return data
 
     def get_task_name(self) -> str:

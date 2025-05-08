@@ -1,11 +1,10 @@
-# from task_base import Task
-from task_database import TaskDatabase
-from task_math import TaskMath
-from task_code import TaskCode
-from task_summary import TaskSummary
-from task_data2text import TaskData2Text
-from task_actions import TaskActions
-from task_translation import TaskTranslation
+from tasks.database import TaskDatabase
+from tasks.math import TaskMath
+from tasks.code import TaskCode
+from tasks.summary import TaskSummary
+from tasks.data2text import TaskData2Text
+from tasks.actions import TaskActions
+from tasks.translation import TaskTranslation
 
 
 def get_task(task_name, version=None):
@@ -30,3 +29,6 @@ def get_task(task_name, version=None):
     else:
         raise ValueError(f"Task {task_name} not supported")
 
+if __name__ == "__main__":
+    task = get_task("data2text")
+    print(len(task.get_samples()))

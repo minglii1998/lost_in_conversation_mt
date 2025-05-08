@@ -1,4 +1,4 @@
-from utils_summahay_eval import build_ref_insight2docids, compute_single_sample_results, evaluate_insights
+from tasks.summary.eval_summhay import build_ref_insight2docids, compute_single_sample_results, evaluate_insights
 from collections import Counter
 import os, json, random, math
 from task_base import Task
@@ -119,15 +119,13 @@ class TaskSummary(Task):
         return "summary"
 
     def get_dataset_file(self) -> str:
-        return "data/sharded_summary.json"
+        return "data/sharded_instructions_600.json"
 
-    def get_samples(self, filter="full"):
+    def get_samples(self):
         with open(self.get_dataset_file(), "r") as f:
             samples = json.load(f)
-        if filter == "full":
-            return samples
-        else:
-            raise ValueError(f"Invalid filter: {filter}")
+        samples = [d for d in samples if d["task"] == "summary"]
+        return samples
 
 
     def evaluator_function(self, extracted_answer, sample):

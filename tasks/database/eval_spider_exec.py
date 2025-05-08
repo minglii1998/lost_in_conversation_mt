@@ -2,7 +2,7 @@ import os, re, asyncio, sqlite3, threading, tqdm, random, json
 from typing import Tuple, Any, List, Set
 from itertools import product
 from collections import defaultdict
-from utils_eval_spider_parse import get_all_preds_for_execution, remove_distinct
+from tasks.database.eval_spider_parse import get_all_preds_for_execution, remove_distinct
 from itertools import chain
 from utils import print_colored
 
