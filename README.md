@@ -4,12 +4,39 @@
   <img height="500" src="https://github.com/microsoft/lost_in_conversation/blob/main/images/Lost_in_Conv_Github_Teaser.png?raw=true">
 </p>
 
-Lost in Conversation is a code repository to facilitate benchmarking LLMs on multi-turn task completion and the reproduction of experiments included in the accompanying paper: "LLMs Get Lost in Multi-Turn Conversation". Simulating conversations with the provided code can reproduce findings from the paper, such as results in the below Table:
+Simulating conversations with the provided code can reproduce findings from the paper, such as results in the below Table:
 
 <p align="center">
   <img height="500" src="https://github.com/microsoft/lost_in_conversation/blob/main/images/Lost_in_Conv_Main_Table.png?raw=true">
 </p>
 
+# Table of Contents
+
+## Introduction
+- [LLMs Get Lost in Multi-Turn Conversation](#llms-get-lost-in-multi-turn-conversation)
+
+## Getting Started
+- [Repository Contents](#repository-contents)
+- [Simulating Conversations](#1-simulating-conversations)
+- [Viewing Simulated Conversations](#2-viewing-simulated-conversations)
+- [Adding a New Task](#3-adding-a-new-task)
+- [Setup Details](#4-setup-details)
+
+## Dataset Information
+- [Dataset Contents](#dataset-contents)
+- [Dataset Creation & Processing](#dataset-creation--processing)
+
+## Usage Guidelines
+- [Intended Use](#intended-use)
+- [Out-of-scope Use](#out-of-scope-use)
+- [Limitations](#limitations)
+- [Best Practices](#best-practices)
+
+## Additional Information
+- [Contributing](#contributing)
+- [Trademarks](#trademarks)
+- [Cite the Work](#cite-the-work)
+- [Contact](#contact)
 
 ## Repository Contents
 
