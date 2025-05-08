@@ -3,6 +3,9 @@ tqdm
 tiktoken
 pandas
 streamlit
+ujson
+datasets
+GitPython
 nltk # Spider evaluation requirement
 sqlparse # Spider evaluation requirement
 pymongo # bson ObjectId
