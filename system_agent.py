@@ -1,7 +1,8 @@
+import json
 from utils import extract_conversation
 from model_openai import generate_json
 from tasks import get_task
-import json
+
 
 class SystemAgent:
     def __init__(self, task_name, system_model, sample):
@@ -36,7 +37,7 @@ class SystemAgent:
         # print("--------------------- TURN CLASSIFICATION ---------------------")
         # print(last_turn_text)
 
-        system_verification_prompt_populated = self.system_verification_prompt.replace("[[CONVERSATION_SO_FAR]]", last_turn_text).replace("[[INITIAL_QUERY]]", initial_query).replace("[[HINTS]]", json.dumps(shards)).replace("[[ANSWER_DESCRIPTION]]", self.answer_description)
+        system_verification_prompt_populated = self.system_verification_prompt.replace("[[CONVERSATION_SO_FAR]]", last_turn_text).replace("[[INITIAL_SHARD]]", initial_query).replace("[[SHARDS]]", json.dumps(shards)).replace("[[ANSWER_DESCRIPTION]]", self.answer_description)
         system_verification_response_obj = generate_json([{"role": "user", "content": system_verification_prompt_populated}], model=self.system_model, return_metadata=True, temperature=0.0)
         system_verification_response = system_verification_response_obj["message"]
 
@@ -44,7 +45,7 @@ class SystemAgent:
         # print("--------------------- END TURN CLASSIFICATION ---------------------")
 
         return system_verification_response, system_verification_response_obj["total_usd"]
-    
+
     def extract_answer(self, conversation_so_far):
         assistant_response = [msg["content"] for msg in conversation_so_far if msg["role"] == "assistant"][-1]
 
@@ -78,7 +79,7 @@ class SystemAgent:
 
                 if extracted_answer is not None and extracted_answer not in assistant_response:
                     extracted_answer = None # will need to try again, this ensures the process is extractive
-        
+
         if extracted_answer is None:
             print(f"Failed to extract answer after {extraction_attempts} attempts")
             extracted_answer = "" # defaulting to empty string

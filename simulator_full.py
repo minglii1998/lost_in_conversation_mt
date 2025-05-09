@@ -1,9 +1,11 @@
+import random
+
 from utils_log import log_conversation
 from system_agent import SystemAgent
 from model_openai import generate
 from tasks import get_task
 from utils import date_str
-import random
+
 
 class ConversationSimulatorFull:
     def __init__(self, sample, assistant_model, system_model, run_concat=False, run_shuffle_concat=False, temperature=1.0, dataset_fn=None, log_folder=None):
@@ -60,7 +62,7 @@ class ConversationSimulatorFull:
         extracted_answer = self.system_agent.extract_answer(trace)
 
         evaluation_return = self.task.evaluator_function(extracted_answer, self.sample)
-        assert type(evaluation_return) == dict and ("score" in evaluation_return or "is_correct" in evaluation_return), f"Evaluator function should return a dictionary with 'score' or 'is_correct' key"
+        assert type(evaluation_return) is dict and ("score" in evaluation_return or "is_correct" in evaluation_return), "Evaluator function should return a dictionary with 'score' or 'is_correct' key"
         score = evaluation_return.get("score", None)
         is_correct = score == 1.0
 

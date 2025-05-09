@@ -1,4 +1,8 @@
-import tqdm, argparse, random, multiprocessing, os, json
+import argparse
+import random
+import multiprocessing
+import json
+import tqdm
 from simulator_sharded import ConversationSimulatorSharded
 from simulator_full import ConversationSimulatorFull
 from concurrent.futures import ThreadPoolExecutor
@@ -55,7 +59,7 @@ if __name__ == '__main__':
 
     with open(dataset_fn, "r") as f:
         samples = json.load(f)
-    
+
     samples = [d for d in samples if d["task"] in args.tasks]
 
     print(f"Loaded {len(samples)} samples")

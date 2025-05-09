@@ -1,9 +1,11 @@
-import pandas as pd, json, streamlit as st, os
-from tasks import get_task
+import json
+import os
+import streamlit as st
 from collections import defaultdict
 from datetime import datetime
-from pprint import pprint
-import glob
+
+from tasks import get_task
+
 
 def load_conversations(file_path):
     conversations = []
@@ -11,6 +13,7 @@ def load_conversations(file_path):
         for line in f:
             conversations.append(json.loads(line))
     return conversations
+
 
 def format_timestamp(timestamp_str):
     if not timestamp_str:  # Handle empty string
@@ -21,6 +24,7 @@ def format_timestamp(timestamp_str):
     except ValueError:  # Handle invalid timestamp format
         return "Invalid timestamp"
 
+
 def group_conversations_by_model(conversations):
     grouped = {}
     for conv in conversations:
@@ -28,6 +32,7 @@ def group_conversations_by_model(conversations):
             grouped[conv['assistant_model']] = []
         grouped[conv['assistant_model']].append(conv)
     return grouped
+
 
 def get_conversation_stats(conversations):
     total_convs = len(conversations)
@@ -37,12 +42,13 @@ def get_conversation_stats(conversations):
     solved_convs = sum(1 for conv in conversations if conv.get('is_correct', False))
     avg_turns = sum(len([t for t in conv["trace"] if t["role"] == "user"]) for conv in conversations) / total_convs
     success_rate = (solved_convs/total_convs)*100 if total_convs > 0 else 0
-    
+
     return total_convs, solved_convs, success_rate, avg_turns
+
 
 def display_chat(conversation, sample):
     st.title(f"Conversation Simulator Viewer ({conversation['conv_id']})")
-    
+
     # Display conversation metadata
     st.sidebar.header("Conversation Info")
     st.sidebar.write(f"Sample ID: {conversation.get('sample_id', 'N/A')}")
@@ -51,16 +57,16 @@ def display_chat(conversation, sample):
     st.sidebar.write(f"User Model: {conversation.get('user_model', 'N/A')}")
     st.sidebar.write(f"Solved: {conversation.get('solved', False)}")
     st.sidebar.write(f"Number of Turns: {conversation.get('num_turns', 0)}")
-    
+
     # Display the chat messages
     for turn in conversation.get('trace', []):
         role = turn.get('role', '')
         timestamp = format_timestamp(turn.get('timestamp', ''))
-        
+
         if role == 'user':
             message = turn.get('content', '')
             st.chat_message('user').write(f"{message}\n\n*{timestamp}*")
-            
+
         elif role == 'assistant':
             message = turn.get('content', '')
             st.chat_message('assistant').write(f"{message}\n\n*{timestamp}*")
@@ -95,7 +101,7 @@ def main():
     try:
         # Get initial options
         tasks = os.listdir(LOG_PATH)
-        
+
         # Change selectbox to radio for task
         selected_task = st.sidebar.radio(
             "Select Task",
@@ -107,7 +113,7 @@ def main():
         dataset_fn = task.get_dataset_file().split("/")[-1]
 
         # Get available tasks for selected type
-        available_conv_types = [d for d in os.listdir(f'{LOG_PATH}/{selected_task}') 
+        available_conv_types = [d for d in os.listdir(f'{LOG_PATH}/{selected_task}')
                                 if os.path.isdir(os.path.join(LOG_PATH, selected_task, d))]
 
         # Change selectbox to radio for conversation type
@@ -116,7 +122,7 @@ def main():
         # Get all JSONL files for the selected type and task
         log_path = os.path.join(LOG_PATH, selected_task, selected_type)
         log_files = [f for f in os.listdir(log_path) if f.endswith('.jsonl')]
-        
+
         # Load all conversations from the selected path
         conversations = []
         for file in log_files:
@@ -127,22 +133,22 @@ def main():
 
         # Group conversations by assistant model
         grouped_conversations = group_conversations_by_model(conversations)
-        
+
         # Third selectbox for model
         selected_model = st.sidebar.selectbox(
             "Select Assistant Model",
             options=sorted(grouped_conversations.keys())
         )
-        
+
         # Get conversations for selected model
         all_model_conversations = grouped_conversations[selected_model]
 
         # Add a checkbox to filter only the conversations that were not correct
         filter_incorrect = st.sidebar.checkbox("Show only incorrect conversations", value=False)
-        
+
         if filter_incorrect:
             all_model_conversations = [conv for conv in all_model_conversations if not conv.get("is_correct", True)]
-        
+
         # Group by task_id
         grouped_by_task_id = defaultdict(list)
         for conv in all_model_conversations:
@@ -164,7 +170,7 @@ def main():
         # Display statistics for selected model
         st.sidebar.header("Model Statistics")
         total_convs, solved_convs, success_rate, avg_turns = get_conversation_stats(all_model_conversations)
-        
+
         st.sidebar.write(f"Total Conversations: {total_convs}")
         st.sidebar.write(f"Solved Conversations: {solved_convs}")
         st.sidebar.write(f"Success Rate: {success_rate:.1f}%")
@@ -176,7 +182,7 @@ def main():
         sample = task.get_sample(selected_conversation["task_id"])
 
         display_chat(selected_conversation, sample)
-        
+
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 

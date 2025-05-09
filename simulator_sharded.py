@@ -1,10 +1,13 @@
+import json
+import random
+
 from utils import print_colored, extract_conversation, date_str
 from utils_log import log_conversation
 from system_agent import SystemAgent
 from model_openai import generate
 from user_agent import UserAgent
 from tasks import get_task
-import json, random
+
 
 class ConversationSimulatorSharded:
     def __init__(self, sample, assistant_model="gpt-4o-mini", system_model="gpt-4o-mini", user_model="gpt-4o-mini", assistant_temperature=1.0, user_temperature=1.0, dataset_fn=None, log_folder="logs"):
@@ -16,7 +19,7 @@ class ConversationSimulatorSharded:
         self.system_model = system_model
         self.user_model = user_model
         self.user_agent = UserAgent(self.task, user_model)
-        self.system_agent = SystemAgent(self.task_name, system_model, self.sample)  
+        self.system_agent = SystemAgent(self.task_name, system_model, self.sample)
         self.log_folder = log_folder
         self.system_message = self.task.generate_system_prompt(self.sample)
         self.answer_description = self.task.get_answer_description()
@@ -85,7 +88,7 @@ class ConversationSimulatorSharded:
                 else:
                     evaluation_return = self.task.evaluator_function(extracted_answer, self.sample)
 
-                    assert type(evaluation_return) == dict and ("score" in evaluation_return or "is_correct" in evaluation_return), f"Evaluator function should return a dictionary with 'score' or 'is_correct' key"
+                    assert type(evaluation_return) is dict and ("score" in evaluation_return or "is_correct" in evaluation_return), "Evaluator function should return a dictionary with 'score' or 'is_correct' key"
                     is_correct = evaluation_return.get("is_correct", None)
                     score = evaluation_return.get("score", None)
 

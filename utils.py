@@ -9,7 +9,7 @@ def load_env_vars(filepath='.env'):
                 # Remove 'export' if present and any leading/trailing whitespace
                 if line.startswith('export '):
                     line = line[7:].strip()
-                
+
                 # Split on first '=' only
                 if '=' in line:
                     key, value = line.split('=', 1)
@@ -29,6 +29,7 @@ def print_colored(text, color):
         print(f"\033[95m{text}\033[0m")
     else:
         raise Exception(f"Unknown color: {color}")
+
 
 def extract_conversation(simulation_trace, to_str=False, skip_system=False, only_last_turn=False):
     keep_roles = ["system", "assistant", "user"] if not skip_system else ["assistant", "user"]

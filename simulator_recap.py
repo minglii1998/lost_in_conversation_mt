@@ -1,9 +1,12 @@
+import os
+import json
+import argparse
+import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from utils import extract_conversation, date_str
 from utils_log import log_conversation
 from system_agent import SystemAgent
 from model_openai import generate
-import os, json, argparse, tqdm
 from tasks import get_task
 
 recap_message = """Just to recapitulate, the entire task is:
@@ -53,7 +56,7 @@ class RecapSimulator:
         if system_verification_response["response_type"] == "answer_attempt":
             extracted_answer = system_agent.extract_answer(recap_trace)
             evaluation_return = self.task.evaluator_function(extracted_answer, sharded_sample)
-            assert type(evaluation_return) == dict and ("score" in evaluation_return or "is_correct" in evaluation_return), f"Evaluator function should return a dictionary with 'score' or 'is_correct' key"
+            assert type(evaluation_return) is dict and ("score" in evaluation_return or "is_correct" in evaluation_return), "Evaluator function should return a dictionary with 'score' or 'is_correct' key"
             is_correct = evaluation_return.get("is_correct", None)
             score = evaluation_return.get("score", None)
             recap_trace.append({"role": "log", "content": {"type": "answer-evaluation", "exact_answer": extracted_answer, "is_correct": is_correct, "score": score, "evaluation_return": evaluation_return}, "timestamp": date_str()})

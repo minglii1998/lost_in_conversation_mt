@@ -1,7 +1,7 @@
+import json
+
 from model_openai import generate_json
 from utils import extract_conversation
-from tasks import get_task
-import json, random
 
 class UserAgent:
     def __init__(self, task, model="gpt-4o"):
@@ -16,7 +16,6 @@ class UserAgent:
 
         if self.task_name in ["translation", "summary", "data2text"]:
             return self.task.populate_sharded_prompt(sample, num_user_msgs)
-
 
         if num_user_msgs == 0:
             shard_id = -1
@@ -40,7 +39,7 @@ class UserAgent:
             shards_not_revealed_str = json.dumps(shard_texts_not_revealed)
 
 
-            user_agent_prompt_populated = self.prompt_response.replace("[[CONVERSATION_SO_FAR]]", extract_conversation(conversation, to_str=True, skip_system=True)).replace("[[HINTS_REVEALED]]", shards_revealed_str).replace("[[HINTS_NOT_REVEALED]]", shards_not_revealed_str)
+            user_agent_prompt_populated = self.prompt_response.replace("[[CONVERSATION_SO_FAR]]", extract_conversation(conversation, to_str=True, skip_system=True)).replace("[[SHARDS_REVEALED]]", shards_revealed_str).replace("[[SHARDS_NOT_REVEALED]]", shards_not_revealed_str)
             response_obj = generate_json([{"role": "user", "content": user_agent_prompt_populated}], model=self.model, timeout=100, return_metadata=True, temperature=temperature)
             response = response_obj["message"]
 

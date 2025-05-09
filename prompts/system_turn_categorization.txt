@@ -1,10 +1,10 @@
 You are reviewing a multi-turn conversation between a user and an assistant, and are given the last turn of the conversation.
 
 Here is the full specification of the problem the system is attempting to solve:
-[[INITIAL_QUERY]]
+[[INITIAL_SHARD]]
 
 Specification:
-[[HINTS]]
+[[SHARDS]]
 
 You must classify the response of the assistant according to the response type:
 - `answer_attempt`: The response contains a complete answer attempt to the user's question (not templated or hypothetical), that can be extracted verbatim. See the task-specific answer description for more details.

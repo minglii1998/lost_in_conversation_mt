@@ -1,7 +1,12 @@
-import ujson as json, os, git, time, pandas as pd
+import json
+import os
+import git
+import time
+import pandas as pd
 from bson.objectid import ObjectId
 from collections import Counter
 from datetime import datetime
+
 
 def get_log_files(conv_type, task_name, assistant_model, force_create=False, log_folder="logs"):
     # Sanitize the assistant_model name for Windows compatibility
@@ -37,6 +42,7 @@ def get_log_files(conv_type, task_name, assistant_model, force_create=False, log
             return []
 
     return sorted(log_files)  # Sort to ensure consistent order
+
 
 def get_run_counts(conv_type, task_name, assistant_model, dataset_fn, log_folder="logs"):
     dataset_fn = dataset_fn.split("/")[-1] # Remove folders
@@ -121,8 +127,9 @@ def load_results_from(folder, dataset_fn, merge_trapi=True):
                 model_data[model].append(log)
     return model_data
 
+
 def clean_up_logs(task_name, dataset_fn, ids=None, conv_types="all", models="all", is_mock=False, log_folder="logs"):
-    assert models == "all" or (type(models) == list)
+    assert models == "all" or (type(models) is list)
 
     # we're going to clean the files in the following manner:
     folder = f"{log_folder}/{task_name}"
@@ -151,6 +158,7 @@ def clean_up_logs(task_name, dataset_fn, ids=None, conv_types="all", models="all
     for (dataset_fn, conv_type, model), count in N_filtered.items():
         print(f"{dataset_fn} {conv_type} {model}: {count}")
 
+
 def check_latest_updates():
     """
     Checks all files in the logs folder and its subfolders for files modified in the last 3 minutes.
@@ -175,6 +183,7 @@ def check_latest_updates():
         conv_type, task_name, model = fn.split("_")
         dataset.append({"task_name": task_name, "conv_type": conv_type, "model": model, "mod_time": mod_time})
     return pd.DataFrame(dataset)
+
 
 def split_large_file(file_path, max_size_mb=30):
     assert file_path.endswith(".jsonl")
@@ -216,6 +225,7 @@ def split_large_file(file_path, max_size_mb=30):
 
     # remove the original file
     os.remove(file_path)
+
 
 def split_files_in_folder(folder):
     for fn in os.listdir(folder):

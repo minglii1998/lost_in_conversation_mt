@@ -1,13 +1,12 @@
 You are a given a fully specified instruction, and your task is to segment the instruction into a units of information that each reveal a single piece of information of the instruction.
 You must output a list of segments in the following JSON format:
 [
-    {"segment": "[exact excerpt from the instruction]", "is_required": 1|0},
-    {"segment": "[exact excerpt from the instruction]", "is_required": 1|0},
+    {"segment": "[exact excerpt from the instruction]"},
+    {"segment": "[exact excerpt from the instruction]"},
     ...
 ]
 
 Rules:
-- [is_required] For each segment, you must specify whether this particular segment is required (1) or not strictly necessary (0) to answer the instruction.
 - [Non-overlapping] The segments must be non-overlapping and cover the entire instruction. You can optionally leave some gaps for non-essential portions of the original instruction (delimiters, headers, etc.)
 - [Minimalistic] You should split the information in the segments to as small as possible. If you have a compound expression (X and Y), you should split it into two segments. Each segment should represent a unit of information.
 
@@ -16,13 +15,13 @@ What are the names and locations of the stadiums that had concerts that occurred
 
 Output:
 {"segments": [
-    {"segment": "names and locations", "is_required": 1},
-    {"segment": "stadiums", "is_required": 1},
-    {"segment": "concerts", "is_required": 1},
-    {"segment": "in both 2014", "is_required": 1},
-    {"segment": "and 2015", "is_required": 1}
+    {"segment": "names and locations"},
+    {"segment": "stadiums"},
+    {"segment": "concerts"},
+    {"segment": "in both 2014"},
+    {"segment": "and 2015"}
 ]}
 
-Now complete the task for the following fully specified query:
+Now complete the task for the following fully specified instruction:
 
-[[QUERY]]
+[[INSTRUCTION]]
