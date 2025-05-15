@@ -34,7 +34,7 @@
 
 
 
-Lost in Conversation is a code repository to facilitate benchmarking LLMs on multi-turn task completion and the reproduction of experiments included in the accompanying paper: "LLMs Get Lost in Multi-Turn Conversation". Simulating conversations with the provided code can reproduce findings from the paper, such as results in the below Table:
+Lost in Conversation is a code repository to facilitate benchmarking LLMs on multi-turn task completion and the reproduction of experiments included in the accompanying paper: "[LLMs Get Lost in Multi-Turn Conversation](https://arxiv.org/abs/2505.06120)". Simulating conversations with the provided code can reproduce findings from the paper, such as results in the below Table:
 
 <p align="center">
   <img height="500" src="https://github.com/microsoft/lost_in_conversation/blob/main/images/Lost_in_Conv_Main_Table.png?raw=true">
@@ -192,9 +192,11 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 If you make use of the code, data, or findings, please cite our paper:
 ```
-@inproceedings{laban2025lost_in_conv,
+@article{laban2025llms,
   title={LLMs Get Lost In Multi-Turn Conversation},
   author={Laban, Philippe and Hayashi, Hiroaki and Zhou, Yingbo and Neville, Jennifer},
+  journal={arXiv preprint arXiv:2505.06120},
+  year={2025}
 }
 ```
 
