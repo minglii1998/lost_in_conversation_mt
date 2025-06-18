@@ -54,7 +54,7 @@ Lost in Conversation is a code repository to facilitate benchmarking LLMs on mul
 
 You can simply run the following command:
 ```sh
-python run_experiments.py
+python run_simulations.py
 ```
 
 Which will simulate conversations with all the default parameters (run with `--help` to find out what they are).
