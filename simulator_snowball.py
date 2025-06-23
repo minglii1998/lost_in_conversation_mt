@@ -135,7 +135,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="database", choices=["database", "wmt", "summary", "math", "apis", "data2text", "python"])
+    parser.add_argument("--task", type=str, default="database", choices=["code", "database", "actions", "math", "data2text", "summary"])
     parser.add_argument("--assistant_model", type=str, default="gpt-4o-mini")
     parser.add_argument("--system_model", type=str, default="gpt-4o-mini")
     parser.add_argument("--user_model", type=str, default="gpt-4o-mini")
