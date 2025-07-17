@@ -2,13 +2,13 @@ import random
 
 from utils_log import log_conversation
 from system_agent import SystemAgent
-from model_openai import generate
+from utils_model import get_model_class
 from tasks import get_task
 from utils import date_str
 
 
 class ConversationSimulatorFull:
-    def __init__(self, sample, assistant_model, system_model, run_concat=False, run_shuffle_concat=False, temperature=1.0, dataset_fn=None, log_folder=None):
+    def __init__(self, sample, assistant_model, system_model, run_concat=False, run_shuffle_concat=False, temperature=1.0, dataset_fn=None, log_folder=None, additional_system_prompt=""):
         self.task_name = sample["task"]
         self.task = get_task(self.task_name)
         self.dataset_fn = dataset_fn
@@ -22,7 +22,12 @@ class ConversationSimulatorFull:
         self.temperature = temperature
 
         self.system_message = self.task.generate_system_prompt(self.sample)
+        if additional_system_prompt:
+            self.system_message = self.system_message + "\n" + additional_system_prompt
         self.system_agent = SystemAgent(self.task_name, self.system_model, self.sample)
+        
+        # Initialize the model
+        self.model = get_model_class(assistant_model)
 
     def run(self, verbose=False, save_log=True):
         if self.run_shuffle_concat and self.run_concat:
@@ -51,7 +56,7 @@ class ConversationSimulatorFull:
         is_reasoning_model = "o1" in self.assistant_model or "o3" in self.assistant_model or "deepseek-r1" in self.assistant_model
 
         max_tokens = 16000 if is_reasoning_model else 1000
-        assistant_response_obj = generate([{"role": "system", "content": self.system_message},{"role": "user", "content": input_prompt}], model=self.assistant_model, return_metadata=True, temperature=self.temperature, max_tokens=max_tokens)
+        assistant_response_obj = self.model.generate([{"role": "system", "content": self.system_message},{"role": "user", "content": input_prompt}], model=self.assistant_model, return_metadata=True, temperature=self.temperature, max_tokens=max_tokens)
 
         assistant_response = assistant_response_obj["message"]
         if verbose:
@@ -89,6 +94,7 @@ if __name__ == "__main__":
     parser.add_argument("--run_concat", action="store_true")
     parser.add_argument("--run_shuffle_concat", action="store_true")
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--additional_system_prompt", type=str, default="")
     args = parser.parse_args()
 
     if args.run_concat and args.run_shuffle_concat:
@@ -101,5 +107,5 @@ if __name__ == "__main__":
 
     sample = random.choice(data)
 
-    conversation_simulator = ConversationSimulatorFull(sample, args.assistant_model, args.system_model, args.run_concat, args.run_shuffle_concat)
+    conversation_simulator = ConversationSimulatorFull(sample, args.assistant_model, args.system_model, args.run_concat, args.run_shuffle_concat, additional_system_prompt=args.additional_system_prompt)
     conversation_simulator.run(verbose=args.verbose, save_log=False)

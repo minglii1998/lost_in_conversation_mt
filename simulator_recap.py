@@ -72,7 +72,7 @@ class RecapSimulator:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="database")
+    parser.add_argument("--task", type=str, default="spider")
     parser.add_argument("--models", type=str, nargs="+")
     parser.add_argument("--N_workers", type=int, default=5)
     args = parser.parse_args()
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     task_name = args.task
     todo_convs = []
 
-    samples = get_task(task_name).get_samples()
+    samples = get_task(task_name).get_samples(filter="full")
     task_ids = set([d["task_id"] for d in samples])
 
     for recap_type in ["concat"]:

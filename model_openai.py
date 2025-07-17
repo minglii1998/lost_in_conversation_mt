@@ -112,9 +112,23 @@ class OpenAI_Model:
         return response
 
 
-model = OpenAI_Model()
-generate = model.generate
-generate_json = model.generate_json
+# Lazy initialization to avoid requiring API key on import
+_model_instance = None
+
+def _get_model():
+    """Get or create the OpenAI model instance (lazy initialization)"""
+    global _model_instance
+    if _model_instance is None:
+        _model_instance = OpenAI_Model()
+    return _model_instance
+
+def generate(*args, **kwargs):
+    """Generate function with lazy model initialization"""
+    return _get_model().generate(*args, **kwargs)
+
+def generate_json(*args, **kwargs):
+    """Generate JSON function with lazy model initialization"""
+    return _get_model().generate_json(*args, **kwargs)
 
 
 

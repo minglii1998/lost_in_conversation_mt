@@ -14,12 +14,13 @@ def run_simulation(todo):
     try:
         assistant_temp = todo.get("assistant_temperature", 1.0)
         user_temp = todo.get("user_temperature", 1.0)
+        additional_system_prompt = todo.get("additional_system_prompt", "")
         if todo["conv_type"].startswith("full"):
-            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder)
+            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt)
         elif todo["conv_type"].startswith("concat"):
-            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], run_concat=True, temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder)
+            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], run_concat=True, temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt)
         elif todo["conv_type"].startswith("sharded"):
-            conversation_simulator = ConversationSimulatorSharded(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], user_model=todo["user_model"], assistant_temperature=assistant_temp, user_temperature=user_temp, dataset_fn=dataset_fn, log_folder=args.log_folder)
+            conversation_simulator = ConversationSimulatorSharded(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], user_model=todo["user_model"], assistant_temperature=assistant_temp, user_temperature=user_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt)
         conversation_simulator.run(verbose=args.verbose)
 
     except Exception as e:
@@ -48,6 +49,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--assistant_temperature", type=float, default=1.0, help="Temperature to use for assistant models")
     parser.add_argument("--user_temperature", type=float, default=1.0, help="Temperature to use for user models")
+    parser.add_argument("--additional_system_prompt", type=str, default="", help="Additional system prompt to append to the base system prompt")
 
     args = parser.parse_args()
 
@@ -82,9 +84,9 @@ if __name__ == '__main__':
         print(f"Concat run counts: {concat_run_counts}")
 
         for sample in samples:
-            all_todos += [{"sample": sample, "assistant_model": assistant_model, "conv_type": full_ct, "system_model": args.system_model, "dataset_fn": dataset_fn}] * (args.N_full_runs - full_run_counts[sample["task_id"]])
-            all_todos += [{"sample": sample, "assistant_model": assistant_model, "conv_type": concat_ct, "system_model": args.system_model, "dataset_fn": dataset_fn}] * (args.N_concat_runs - concat_run_counts[sample["task_id"]])
-            all_todos += [{"sample": sample, "assistant_model": assistant_model, "conv_type": sharded_ct, "system_model": args.system_model, "user_model": args.user_model, "dataset_fn": dataset_fn}] * (args.N_sharded_runs - sharded_run_counts[sample["task_id"]])
+            all_todos += [{"sample": sample, "assistant_model": assistant_model, "conv_type": full_ct, "system_model": args.system_model, "dataset_fn": dataset_fn, "additional_system_prompt": args.additional_system_prompt}] * (args.N_full_runs - full_run_counts[sample["task_id"]])
+            all_todos += [{"sample": sample, "assistant_model": assistant_model, "conv_type": concat_ct, "system_model": args.system_model, "dataset_fn": dataset_fn, "additional_system_prompt": args.additional_system_prompt}] * (args.N_concat_runs - concat_run_counts[sample["task_id"]])
+            all_todos += [{"sample": sample, "assistant_model": assistant_model, "conv_type": sharded_ct, "system_model": args.system_model, "user_model": args.user_model, "dataset_fn": dataset_fn, "additional_system_prompt": args.additional_system_prompt}] * (args.N_sharded_runs - sharded_run_counts[sample["task_id"]])
 
     if args.assistant_temperature != 1.0 or args.user_temperature != 1.0:
         # update todos with temperature
@@ -92,7 +94,7 @@ if __name__ == '__main__':
             todo["assistant_temperature"] = args.assistant_temperature
             todo["user_temperature"] = args.user_temperature
 
-    random.shuffle(all_todos)
+    # random.shuffle(all_todos)
 
     print(f"Running {len(all_todos)} conversations")
     print(Counter([todo["assistant_model"] for todo in all_todos]))

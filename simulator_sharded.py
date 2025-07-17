@@ -4,13 +4,13 @@ import random
 from utils import print_colored, extract_conversation, date_str
 from utils_log import log_conversation
 from system_agent import SystemAgent
-from model_openai import generate
+from utils_model import get_model_class
 from user_agent import UserAgent
 from tasks import get_task
 
 
 class ConversationSimulatorSharded:
-    def __init__(self, sample, assistant_model="gpt-4o-mini", system_model="gpt-4o-mini", user_model="gpt-4o-mini", assistant_temperature=1.0, user_temperature=1.0, dataset_fn=None, log_folder="logs"):
+    def __init__(self, sample, assistant_model="gpt-4o-mini", system_model="gpt-4o-mini", user_model="gpt-4o-mini", assistant_temperature=1.0, user_temperature=1.0, dataset_fn=None, log_folder="logs", additional_system_prompt=""):
         self.task_name = sample["task"]
         self.task = get_task(self.task_name)
         self.dataset_fn = dataset_fn
@@ -22,6 +22,8 @@ class ConversationSimulatorSharded:
         self.system_agent = SystemAgent(self.task_name, system_model, self.sample)
         self.log_folder = log_folder
         self.system_message = self.task.generate_system_prompt(self.sample)
+        if additional_system_prompt:
+            self.system_message = self.system_message + "\n" + additional_system_prompt
         self.answer_description = self.task.get_answer_description()
 
         self.run_with_custom_temperature = assistant_temperature != 1.0 or user_temperature != 1.0
@@ -29,6 +31,9 @@ class ConversationSimulatorSharded:
         self.user_temperature = user_temperature
 
         self.trace = [{"role": "system", "content": self.system_message, "timestamp": date_str()}]
+        
+        # Initialize the model
+        self.model = get_model_class(assistant_model)
 
     def get_num_turns(self, participant="assistant"):
         return sum(1 for msg in self.trace if msg["role"] == participant)
@@ -63,7 +68,7 @@ class ConversationSimulatorSharded:
                     print_colored(f"[log] shard revealed: {shard_revealed_id}", "blue")
 
             # 2. get the assistant's response
-            assistant_response_obj = generate(extract_conversation(self.trace, to_str=False), model=self.assistant_model, temperature=self.assistant_temperature, return_metadata=True, max_tokens=max_assistant_tokens)
+            assistant_response_obj = self.model.generate(extract_conversation(self.trace, to_str=False), model=self.assistant_model, temperature=self.assistant_temperature, return_metadata=True, max_tokens=max_assistant_tokens)
             assistant_response = assistant_response_obj["message"]
             self.trace.append({"role": "assistant", "content": assistant_response, "timestamp": date_str(), "cost_usd": assistant_response_obj["total_usd"]})
             if verbose:
@@ -124,6 +129,7 @@ if __name__ == "__main__":
     parser.add_argument("--assistant_model", type=str, default="gpt-4o-mini")
     parser.add_argument("--system_model", type=str, default="gpt-4o-mini")
     parser.add_argument("--user_model", type=str, default="gpt-4o-mini")
+    parser.add_argument("--additional_system_prompt", type=str, default="")
     args = parser.parse_args()
 
     dataset_fn = "data/sharded_instructions_600.json"
@@ -134,5 +140,5 @@ if __name__ == "__main__":
 
     sample = random.choice(data)
 
-    conversation_simulator = ConversationSimulatorSharded(sample=sample, assistant_model=args.assistant_model, system_model=args.system_model, user_model=args.user_model, dataset_fn=dataset_fn)
+    conversation_simulator = ConversationSimulatorSharded(sample=sample, assistant_model=args.assistant_model, system_model=args.system_model, user_model=args.user_model, dataset_fn=dataset_fn, additional_system_prompt=args.additional_system_prompt)
     conversation_simulator.run(verbose=True, save_log=True)

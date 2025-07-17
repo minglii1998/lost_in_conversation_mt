@@ -1,10 +1,16 @@
 numpy
-tqdm
+tqdm>=4.66.0
 tiktoken
-pandas
+pandas>=2.0.0
 streamlit
 GitPython
 nltk # Spider evaluation requirement
 sqlparse # Spider evaluation requirement
 pymongo # bson ObjectId
 sacrebleu  # wmt, totto evaluation
+boto3>=1.34.0
+tenacity>=8.2.0
+botocore>=1.34.0
+python-dateutil>=2.8.2
+transformers
+torch

@@ -6,7 +6,7 @@ from utils_log import log_conversation
 from system_agent import SystemAgent
 from user_agent import UserAgent
 from tasks import get_task
-from model_openai import generate
+from utils_model import get_model_class
 from concurrent.futures import ThreadPoolExecutor
 from utils_log import get_run_counts
 from collections import Counter
@@ -38,6 +38,9 @@ class ConversationSimulatorSnowball:
         self.user_response_template = snowball_message
 
         self.trace = [{"role": "system", "content": self.system_message, "timestamp": date_str()}]
+        
+        # Initialize the model
+        self.model = get_model_class(assistant_model)
 
     def get_num_turns(self, participant="assistant"):
         return sum(1 for msg in self.trace if msg["role"] == participant)
@@ -79,7 +82,7 @@ class ConversationSimulatorSnowball:
                 print_colored(f"[user] {user_response}", "green")
 
             # 2. get the assistant's response
-            assistant_response_obj = generate(extract_conversation(self.trace, to_str=False), model=self.assistant_model, temperature=1.0, return_metadata=True, max_tokens=max_assistant_tokens)
+            assistant_response_obj = self.model.generate(extract_conversation(self.trace, to_str=False), model=self.assistant_model, temperature=1.0, return_metadata=True, max_tokens=max_assistant_tokens)
             assistant_response = assistant_response_obj["message"]
             self.trace.append({"role": "assistant", "content": assistant_response, "timestamp": date_str(), "cost_usd": assistant_response_obj["total_usd"]})
             if verbose:
@@ -135,7 +138,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="database", choices=["code", "database", "actions", "math", "data2text", "summary"])
+    parser.add_argument("--task", type=str, default="database", choices=["database", "wmt", "summary", "math", "apis", "data2text", "python"])
     parser.add_argument("--assistant_model", type=str, default="gpt-4o-mini")
     parser.add_argument("--system_model", type=str, default="gpt-4o-mini")
     parser.add_argument("--user_model", type=str, default="gpt-4o-mini")
