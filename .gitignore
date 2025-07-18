@@ -403,3 +403,5 @@ logs*
 scripts*
 calculate_average_score.py
 calculate_average_score.sh
+
+data/spider/database*
