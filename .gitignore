@@ -405,3 +405,5 @@ calculate_average_score.py
 calculate_average_score.sh
 
 data/spider/database*
+workspace/
+data/databases.zip

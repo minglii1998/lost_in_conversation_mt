@@ -86,11 +86,19 @@ class OpenSource_Model:
         """
         messages = format_messages(messages, variables)
 
-        prompt = self.tokenizer.apply_chat_template(
-            messages,
-            add_generation_prompt=True,
-            tokenize=False,
-        )
+        if 'Qwen3' in self.model_name:
+            prompt = self.tokenizer.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=False,
+                enable_thinking=False,
+            )
+        else:
+            prompt = self.tokenizer.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=False,
+            )
 
         model_inputs = self.tokenizer([prompt], return_tensors="pt").to(self.model.device)
 
