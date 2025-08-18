@@ -10,7 +10,7 @@ from tasks import get_task
 
 
 class ConversationSimulatorSharded:
-    def __init__(self, sample, assistant_model="gpt-4o-mini", system_model="gpt-4o-mini", user_model="gpt-4o-mini", assistant_temperature=1.0, user_temperature=1.0, dataset_fn=None, log_folder="logs", additional_system_prompt=""):
+    def __init__(self, sample, assistant_model="gpt-4o-mini", system_model="gpt-4o-mini", user_model="gpt-4o-mini", assistant_temperature=1.0, user_temperature=1.0, dataset_fn=None, log_folder="logs", additional_system_prompt="", model_real=None):
         self.task_name = sample["task"]
         self.task = get_task(self.task_name)
         self.dataset_fn = dataset_fn
@@ -33,7 +33,10 @@ class ConversationSimulatorSharded:
         self.trace = [{"role": "system", "content": self.system_message, "timestamp": date_str()}]
         
         # Initialize the model
-        self.model = get_model_class(assistant_model)
+        if model_real:
+            self.model = model_real
+        else:
+            self.model = get_model_class(assistant_model)
 
     def get_num_turns(self, participant="assistant"):
         return sum(1 for msg in self.trace if msg["role"] == participant)

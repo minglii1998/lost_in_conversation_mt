@@ -8,22 +8,25 @@ from simulator_full import ConversationSimulatorFull
 from concurrent.futures import ThreadPoolExecutor
 from utils_log import get_run_counts
 from collections import Counter
+from utils_model import get_model_class
 
 import importlib, sys
 sys.modules['deepspeed'] = None  
 
-def run_simulation(todo):
+import itertools
+
+def run_simulation(todo, model_real):
     dataset_fn = todo["dataset_fn"]
     try:
         assistant_temp = todo.get("assistant_temperature", 1.0)
         user_temp = todo.get("user_temperature", 1.0)
         additional_system_prompt = todo.get("additional_system_prompt", "")
         if todo["conv_type"].startswith("full"):
-            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt)
+            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt, model_real=model_real)
         elif todo["conv_type"].startswith("concat"):
-            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], run_concat=True, temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt)
+            conversation_simulator = ConversationSimulatorFull(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], run_concat=True, temperature=assistant_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt, model_real=model_real)
         elif todo["conv_type"].startswith("sharded"):
-            conversation_simulator = ConversationSimulatorSharded(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], user_model=todo["user_model"], assistant_temperature=assistant_temp, user_temperature=user_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt)
+            conversation_simulator = ConversationSimulatorSharded(todo["sample"], assistant_model=todo["assistant_model"], system_model=todo["system_model"], user_model=todo["user_model"], assistant_temperature=assistant_temp, user_temperature=user_temp, dataset_fn=dataset_fn, log_folder=args.log_folder, additional_system_prompt=additional_system_prompt, model_real=model_real)
         conversation_simulator.run(verbose=args.verbose)
 
     except Exception as e:
@@ -103,5 +106,9 @@ if __name__ == '__main__':
     print(Counter([todo["assistant_model"] for todo in all_todos]))
     print(Counter([todo["conv_type"] for todo in all_todos]))
 
+    assistant_model_real = get_model_class(assistant_model)
+
     with ThreadPoolExecutor(max_workers=args.N_workers) as executor:
-        list(tqdm.tqdm(executor.map(run_simulation, all_todos), total=len(all_todos)))
+        # Pass `assistant_model_real` as a constant iterable so that `executor.map` receives
+        # an argument for each item in `all_todos`.
+        list(tqdm.tqdm(executor.map(run_simulation, all_todos, itertools.repeat(assistant_model_real)), total=len(all_todos)))

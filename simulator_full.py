@@ -8,7 +8,7 @@ from utils import date_str
 
 
 class ConversationSimulatorFull:
-    def __init__(self, sample, assistant_model, system_model, run_concat=False, run_shuffle_concat=False, temperature=1.0, dataset_fn=None, log_folder=None, additional_system_prompt=""):
+    def __init__(self, sample, assistant_model, system_model, run_concat=False, run_shuffle_concat=False, temperature=1.0, dataset_fn=None, log_folder=None, additional_system_prompt="", model_real=None):
         self.task_name = sample["task"]
         self.task = get_task(self.task_name)
         self.dataset_fn = dataset_fn
@@ -27,7 +27,10 @@ class ConversationSimulatorFull:
         self.system_agent = SystemAgent(self.task_name, self.system_model, self.sample)
         
         # Initialize the model
-        self.model = get_model_class(assistant_model)
+        if model_real:
+            self.model = model_real
+        else:
+            self.model = get_model_class(assistant_model)
 
     def run(self, verbose=False, save_log=True):
         if self.run_shuffle_concat and self.run_concat:
