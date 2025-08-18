@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Optional
 
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM  # type: ignore
+from peft import PeftModel, PeftConfig
 
 # -----------------------------------------------------------------------------
 # Helper utilities (copied from model_openai.py for consistency)
@@ -39,7 +40,10 @@ class OpenSource_Model:
     def __init__(self, model_name: str = "Qwen/Qwen2-0.5B-Instruct"):
 
         self.model_name = model_name
-        self.tokenizer, self.model = self._load_model(model_name)
+        if "lora" in model_name:
+            self.tokenizer, self.model = self._load_model_lora(model_name)
+        else:
+            self.tokenizer, self.model = self._load_model(model_name)
         print(f"Model loaded successfully: {model_name}")
 
     # ---------------------------------------------------------------------
@@ -52,6 +56,23 @@ class OpenSource_Model:
         kwargs = {"device_map": "auto", "trust_remote_code": True}
         tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
         model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
+
+        return tokenizer, model
+
+    def _load_model_lora(self, model_id: str, device: Optional[int] = None):
+        """Load the tokenizer & model for the requested HF checkpoint."""
+        """Load trained LoRA weights"""
+
+        lora_dir = os.path.join(model_id, "actor/lora_adapter")
+        lora_config_dir = os.path.join(lora_dir, "adapter_config.json")
+        lora_config = json.load(open(lora_config_dir))
+        base_model_id = lora_config["base_model_name_or_path"]
+        
+        kwargs = {"device_map": "auto", "trust_remote_code": True}
+        tokenizer = AutoTokenizer.from_pretrained(base_model_id, trust_remote_code=True)
+        model = AutoModelForCausalLM.from_pretrained(base_model_id, **kwargs)
+
+        model = PeftModel.from_pretrained(model, lora_dir)
 
         return tokenizer, model
 

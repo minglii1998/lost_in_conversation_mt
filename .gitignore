@@ -407,3 +407,5 @@ calculate_average_score.sh
 data/spider/database*
 workspace/
 data/databases.zip
+checkpoints_verl_mt
+cal_acc_markdown_pad.md

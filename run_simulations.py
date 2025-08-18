@@ -9,6 +9,9 @@ from concurrent.futures import ThreadPoolExecutor
 from utils_log import get_run_counts
 from collections import Counter
 
+import importlib, sys
+sys.modules['deepspeed'] = None  
+
 def run_simulation(todo):
     dataset_fn = todo["dataset_fn"]
     try:
